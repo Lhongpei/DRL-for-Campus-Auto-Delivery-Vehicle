@@ -62,7 +62,20 @@ class PPO(torch.nn.Module):
         
         return action.item()
     
-
+    def take_action_eval(self, state, eligibles, strategy='sample'):
+        
+        state = torch.tensor(state, dtype=torch.float).to(self.device).unsqueeze(0)
+        prob = self.actor(state, eligibles)
+        
+        if strategy == 'sample':
+            action_dist = torch.distributions.Categorical(prob)
+            action = action_dist.sample()
+        elif strategy == 'greedy':
+            action = prob.argmax()
+        else:
+            raise ValueError('Invalid strategy')
+        
+        return action.item()
     
     def update(self, transition_dict):
         states = torch.tensor(transition_dict['states'],

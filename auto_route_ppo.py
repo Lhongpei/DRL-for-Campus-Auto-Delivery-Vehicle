@@ -11,24 +11,23 @@ import pickle
 from env.wei_obs_grid import WeightedObsGrid
 from utils.utils import uniform_weight, normal_weight, NormalWeightGrid
 
-def create_new_env(grid_size, start, goal, obstacles, weights):
+def create_new_env():
+    grid_size = (10, 10)
     return WeightedObsGrid(
         grid_size=grid_size,
-        start=start,
-        goal=goal,
-        obstacles=obstacles,
-        weights=weights, 
-        wei_reset=NormalWeightGrid(grid_size)
+        start=(0, 9),
+        goal=(3, 2),
+        obstacles=[(4,4), (1,1), (2,2), (3,3)],
+        weights=np.random.rand(grid_size[0], grid_size[1]),
+        dis_reward=True,
+        wei_reset=NormalWeightGrid(grid_size),
+        #goal_set=[(3, 2), (3, 6), (6, 2),(9, 9)]
     )
 
 
 # 参数设置
-# grid_size = (50, 50)
-# start = (0, 0)
-# goal = (49, 49)
-# obstacles = random.sample([(i, j) for i in range(50) for j in range(50) if (i, j) != start and (i, j) != goal], 100)
-# weights = np.random.rand(grid_size[0], grid_size[1])
-# env = create_new_env(grid_size, start, goal, obstacles, weights)
+
+env = create_new_env()
 env = pickle.load(open('env.pkl', 'rb'))
 env.render()
 actor_lr = 1e-4

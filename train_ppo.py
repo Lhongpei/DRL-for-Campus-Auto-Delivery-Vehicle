@@ -12,7 +12,7 @@ def train_ppo(env, actor_lr, critic_lr, num_episodes, hidden_dim,
               gamma, epsilon, lmbda, epochs, reset_interval, max_steps, use_wandb=True):
     
     if torch.cuda.is_available():
-        device = torch.device("cuda")
+        device = torch.device("cuda:3")
     else:
         device = torch.device("cpu")
 
@@ -28,7 +28,7 @@ def train_ppo(env, actor_lr, critic_lr, num_episodes, hidden_dim,
     with tqdm(total=int(num_episodes), desc='Iteration ' ) as pbar:
         for i_episode in range(int(num_episodes)):
             episode_return = 0
-            state = env.reset()
+            state = env.reset(end_random=False)
             done = False
             print('epsilon:', agent.epsilon)
             iter_num = 0
@@ -76,7 +76,7 @@ def train_ppo(env, actor_lr, critic_lr, num_episodes, hidden_dim,
 
             # 定期重置环境
             if (i_episode + 1) % max(10, reset_interval) == 0:
-                env.reset(start_random=True, wei_reset=None, end_random=True)
+                env.reset(start_random=True, wei_reset=None, end_random=False)
                 print('New Env:', env.start, env.goal)
                 torch.save(agent.state_dict(), f'saved_model/model_{i_episode + 1}.pth')
 

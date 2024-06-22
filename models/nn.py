@@ -44,16 +44,21 @@ class DuelingCNNQnet(nn.Module):
         
         conv_output_size = hidden_dim * 2 * input_shape[1] * input_shape[2]  # 确保这里计算正确
         self.value = nn.Sequential(
-            nn.Linear(conv_output_size, 24),
+            nn.Linear(conv_output_size, 128),
             
             nn.ReLU(),
-            nn.Linear(24, 1)
+            nn.Linear(128, 32),
+            nn.ReLU(),
+            nn.Linear(32, 1)
         )
 
         self.advantage = nn.Sequential(
-            nn.Linear(conv_output_size, action_dim * 2),
+            nn.Linear(conv_output_size, 128),
             nn.ReLU(),
-            nn.Linear(action_dim *2, action_dim)
+            nn.ReLU(),
+            nn.Linear(128, 32),
+            nn.ReLU(),
+            nn.Linear(32, action_dim)
         )
         self.init_weights()
     def init_weights(self):

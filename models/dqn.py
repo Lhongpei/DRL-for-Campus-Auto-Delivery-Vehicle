@@ -152,7 +152,9 @@ class Dueling_DQN(DQN):
         self.q_net = DuelingQnet(state_dim, hidden_dim,
                           self.action_dim).to(device)
         self.target_q_net = DuelingQnet(state_dim, hidden_dim,
-                                 self.action_dim).to(device)    
+                                 self.action_dim).to(device) 
+        self.optimizer = torch.optim.Adam(self.q_net.parameters(),
+                                          lr=learning_rate)   
     
 class D3QN(Double_DQN):
     def __init__(self, state_dim, hidden_dim, action_dim, learning_rate, gamma,
@@ -163,6 +165,8 @@ class D3QN(Double_DQN):
                           self.action_dim).to(device)
         self.target_q_net = DuelingCNNQnet(state_dim, hidden_dim,
                                  self.action_dim).to(device)
+        self.optimizer = torch.optim.Adam(self.q_net.parameters(),
+                                          lr=learning_rate)
         
     # def take_action(self, state, eligibles):
         

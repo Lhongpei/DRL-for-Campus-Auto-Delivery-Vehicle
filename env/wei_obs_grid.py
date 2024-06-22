@@ -6,7 +6,7 @@ import matplotlib.patches as patches
 import random
 from utils.utils import select_k_coordinates
 class WeightedObsGrid(gym.Env):
-    def __init__(self, grid_size=(10, 10), start=(0, 0), goal=(9, 9), obstacles=None, weights=None, wei_reset=None, dis_reward = True):
+    def __init__(self, grid_size=(10, 10), start=(0, 0), goal=(9, 9), obstacles=None, weights=None, wei_reset=None, dis_reward = True, goal_set = None):
         super(WeightedObsGrid, self).__init__()
         self.weights = weights if weights is not None else {}
         self.start = start
@@ -20,6 +20,7 @@ class WeightedObsGrid(gym.Env):
         self.obstacles = obstacles
         self.wei_reset = wei_reset
         self.dis_reward = dis_reward
+        self.goal_set = goal_set
         self.observation_space = spaces.Dict({
             'current_position': spaces.Box(low=0, high=max(grid_size), shape=(2,), dtype=np.float32),
             'end_position': spaces.Box(low=0, high=max(grid_size), shape=(2,), dtype=np.float32),
@@ -54,26 +55,37 @@ class WeightedObsGrid(gym.Env):
         self.state['history'] = np.zeros(self.grid_size, dtype=np.float32)
         if seed:
             np.random.seed(seed)
-        if start_random and end_random:
-            select_s = select_k_coordinates(self.grid_size, 2, self.obstacles)
-            self.state['current_position'] = np.array(select_s[0], dtype=np.float32)
-            self.state['history'][select_s[0]] = 1
-            self.goal = select_s[1]
-            self.start = select_s[0]
-            self.state['end_position'] = np.array(select_s[1], dtype=np.float32)
-        elif start_random:
-            select_s = select_k_coordinates(self.grid_size, 1, self.obstacles)
-            while np.array_equal(select_s[0], self.goal):
+        if self.goal_set is not None:
+            self.goal = random.choice(self.goal_set)
+            self.state['end_position'] = np.array(self.goal, dtype=np.float32)
+            if start_random:
                 select_s = select_k_coordinates(self.grid_size, 1, self.obstacles)
-            self.state['current_position'] = np.array(select_s[0], dtype=np.float32)
-            self.state['history'][select_s[0]] = 1
-            self.start = select_s[0]
-        elif end_random:
-            select_s = select_k_coordinates(self.grid_size, 1, self.obstacles)
-            while np.array_equal(select_s[0], self.start):
+                while np.array_equal(select_s[0], self.goal):
+                    select_s = select_k_coordinates(self.grid_size, 1, self.obstacles)
+                self.state['current_position'] = np.array(select_s[0], dtype=np.float32)
+                self.state['history'][select_s[0]] = 1
+                self.start = select_s[0]
+        else:
+            if start_random and end_random:
+                select_s = select_k_coordinates(self.grid_size, 2, self.obstacles)
+                self.state['current_position'] = np.array(select_s[0], dtype=np.float32)
+                self.state['history'][select_s[0]] = 1
+                self.goal = select_s[1]
+                self.start = select_s[0]
+                self.state['end_position'] = np.array(select_s[1], dtype=np.float32)
+            elif start_random:
                 select_s = select_k_coordinates(self.grid_size, 1, self.obstacles)
-            self.goal = select_s[0]
-            self.state['end_position'] = np.array(select_s[0], dtype=np.float32)
+                while np.array_equal(select_s[0], self.goal):
+                    select_s = select_k_coordinates(self.grid_size, 1, self.obstacles)
+                self.state['current_position'] = np.array(select_s[0], dtype=np.float32)
+                self.state['history'][select_s[0]] = 1
+                self.start = select_s[0]
+            elif end_random:
+                select_s = select_k_coordinates(self.grid_size, 1, self.obstacles)
+                while np.array_equal(select_s[0], self.start):
+                    select_s = select_k_coordinates(self.grid_size, 1, self.obstacles)
+                self.goal = select_s[0]
+                self.state['end_position'] = np.array(select_s[0], dtype=np.float32)
             
         if wei_reset is not None:
             self.state['weight'] = wei_reset(self.grid_size)
