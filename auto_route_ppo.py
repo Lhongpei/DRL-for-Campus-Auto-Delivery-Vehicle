@@ -21,17 +21,18 @@ def create_new_env():
         weights=np.random.rand(grid_size[0], grid_size[1]),
         dis_reward=True,
         wei_reset=NormalWeightGrid(grid_size),
-        #goal_set=[(3, 2), (3, 6), (6, 2),(9, 9)]
+        goal_set=[(3, 2), (3, 6), (6, 2),(9, 9)]
     )
 
 
 # 参数设置
 
 env = create_new_env()
-env = pickle.load(open('env.pkl', 'rb'))
+env = pickle.load(open('env_end_rand.pkl', 'rb'))
+env.dis_reward = True
 env.render()
-actor_lr = 1e-4
-critic_lr = 5e-3
+actor_lr = 1e-5
+critic_lr = 5e-4
 num_episodes = 5000
 hidden_dim = 3
 gamma = 0.9

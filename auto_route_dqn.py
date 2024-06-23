@@ -8,6 +8,7 @@ import gym
 from tqdm import tqdm
 import wandb
 import os
+import pickle
 from utils.utils import uniform_weight, normal_weight
 use_wandb = True
 if torch.cuda.is_available():
@@ -43,14 +44,12 @@ action_dim = 4  # Assuming there are 4 possible actions (up, down, left, right)
 
 agent = Double_DQN(state_dim, hidden_dim, action_dim, lr, gamma, epsilon, epsilon_decay, target_update, device)
 return_list = []
-
+agent.load_state_dict(torch.load('saved_model/Double_DQN_random_start.pth'))
 def create_new_env():
     return WeightedObsGrid(
         grid_size=grid_size,
-        start=(0, 9),
+        start=(0, 0),
         goal=(3, 2),
-        obstacles=[(4,4), (1,1), (2,2), (3,3)],
-        weights=np.random.rand(grid_size[0], grid_size[1])
     )
 
 env = create_new_env()

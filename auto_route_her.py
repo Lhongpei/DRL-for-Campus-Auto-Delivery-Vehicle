@@ -13,7 +13,7 @@ from utils.utils import uniform_weight, normal_weight
 from utils.utils import NormalWeightGrid
 use_wandb = True
 if torch.cuda.is_available():
-    device = torch.device("cuda")
+    device = torch.device("cuda:3")
 else:
     device = torch.device("cpu")
 
@@ -21,15 +21,15 @@ if use_wandb:
     wandb.init(project="wei_shortest")
 
 grid_size = (10, 10)
-lr = 1e-3
+lr = 1e-5
 num_episodes = 5000
 case_num = 1
 hidden_dim = 3
 gamma = 0.9
 epsilon_explore = 0.99
-epsilon = 0.3
+epsilon = 0.001
 epsilon_decay = 1
-epochs = 20
+epochs = 10
 target_update = 50
 buffer_size = 10000
 minimal_size = 50
@@ -51,11 +51,12 @@ def create_new_env():
         weights=np.random.rand(grid_size[0], grid_size[1]),
         dis_reward=False,
         wei_reset=NormalWeightGrid(grid_size),
-        #goal_set=[(3, 2), (3, 6), (6, 2),(9, 9)]
+        goal_set=[(3, 2), (3, 6), (6, 2),(9, 9)]
     )
 
 env = create_new_env()
-env = pickle.load(open('env.pkl', 'rb'))
+#env = pickle.load(open('env_end_rand.pkl', 'rb'))
+pickle.dump(env, open('env_end_rand.pkl', 'wb'))
 env.dis_reward = False
 
 replay_buffer = ReplayBuffer_Trajectory(buffer_size, goal_reward = 2 * env.grid_size[0])
@@ -63,6 +64,7 @@ state_dim = (4, env.grid_size[0], env.grid_size[1])
 action_dim = 4  # Assuming there are 4 possible actions (up, down, left, right)
 
 agent = D3QN(state_dim, hidden_dim, action_dim, lr, gamma, epsilon_explore, epsilon_decay, target_update, device)
+#agent.load_state_dict(torch.load('saved_model/model_5000.pth'))
 return_list = []
 
 
@@ -71,7 +73,7 @@ return_list = []
 with tqdm(total=int(num_episodes), desc='Iteration ' ) as pbar:
     for i_episode in range(int(num_episodes)):
         episode_return = 0
-        state = env.reset(end_random=True, start_random=True)
+        state = env.reset(end_random=False, start_random=True)
         done = False
         print('epsilon:', agent.epsilon)
         iter_num = 0

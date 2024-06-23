@@ -176,5 +176,49 @@ class Critic(nn.Module):
         x = F.relu(self.fc1(cnn_embedding))
         x = self.fc2(x)
         return x
+    
+class Policy(nn.Module):
+    def __init__(self, in_channel, hidden_dim = 32, action_dim = 4):
+        super(Policy, self).__init__()
+        self.cnn_embedding = CNNEmb(in_channel, hidden_dim)
+        self.fc1 = nn.Linear(self.cnn_embedding.conv_output_size, 32)
+        #self.fc2 = nn.Linear(128, 32)
+        self.fc3 = nn.Linear(32, action_dim)
+        self.init_weights()
+    
+    def init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+                nn.init.constant_(m.bias, 0)
+                
+    def forward(self, x):
+        cnn_embedding = self.cnn_embedding(x)
+        x = F.relu(self.fc1(cnn_embedding))
+        #x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+    
+class CriticQnet(nn.Module):
+    def __init__(self, in_channel, hidden_dim = 32, action_dim = 4):
+        super(CriticQnet, self).__init__()
+        self.cnn_embedding = CNNEmb(in_channel, hidden_dim)
+        self.fc1 = nn.Linear(self.cnn_embedding.conv_output_size, 32)
+        #self.fc2 = nn.Linear(128, 32)
+        self.fc3 = nn.Linear(32, action_dim)
+        self.init_weights()
+    
+    def init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+                nn.init.constant_(m.bias, 0)
+                
+    def forward(self, x):
+        cnn_embedding = self.cnn_embedding(x)
+        x = F.relu(self.fc1(cnn_embedding))
+        #x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
                 
         

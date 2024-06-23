@@ -24,11 +24,12 @@ def train_ppo(env, actor_lr, critic_lr, num_episodes, hidden_dim,
 
     agent = PPO(state_dim, hidden_dim, action_dim, actor_lr, critic_lr, gamma, epsilon, lmbda, epochs, device)
     return_list = []
-
+    agent.load_state_dict(torch.load('saved_model/ppo_model_5000.pth'))
     with tqdm(total=int(num_episodes), desc='Iteration ' ) as pbar:
         for i_episode in range(int(num_episodes)):
             episode_return = 0
-            state = env.reset(end_random=False)
+            state = env.reset(end_random=False, start_random = True)
+            print(env.state['current_position'], env.state['end_position'])
             done = False
             print('epsilon:', agent.epsilon)
             iter_num = 0
@@ -78,7 +79,7 @@ def train_ppo(env, actor_lr, critic_lr, num_episodes, hidden_dim,
             if (i_episode + 1) % max(10, reset_interval) == 0:
                 env.reset(start_random=True, wei_reset=None, end_random=False)
                 print('New Env:', env.start, env.goal)
-                torch.save(agent.state_dict(), f'saved_model/model_{i_episode + 1}.pth')
+                torch.save(agent.state_dict(), f'saved_model/ppo_model_{i_episode + 1}.pth')
 
             pbar.update(1)
 

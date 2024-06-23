@@ -102,6 +102,12 @@ class DQN(torch.nn.Module):
             action = prob.argmax().item()
             # action = self.q_net(state).argmax().item()
         return action
+    def take_action_eval(self, state, eligibles):
+        state = torch.tensor(state, dtype=torch.float).to(self.device).unsqueeze(0)
+        prob = torch.zeros(self.action_dim, device=self.device)
+        prob[eligibles==1] = F.softmax(self.q_net(state)[0][eligibles==1], dim=0)
+        action = prob.argmax().item()
+        return action
     
     def max_next_q_values(self, next_states):
         return self.target_q_net(next_states).max(1)[0].view(-1, 1) 
